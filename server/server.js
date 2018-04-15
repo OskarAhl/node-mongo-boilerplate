@@ -1,6 +1,7 @@
 const express = require('express');
 // middleware - parses HTTP request body -  e.g. JSON or text to JS
 const bodyParser = require('body-parser');
+const _ = require('lodash');
 const { ObjectId } = require('mongodb');
 
 const { mongoose } = require('./db/mongoose');
@@ -77,11 +78,11 @@ app.delete('/todos/:id', (req, res) => {
 });
 
 // PATCH / UPDATE 
-app.patch('todos/:id', (req, res) => {
+app.patch('/todos/:id', (req, res) => {
     const id = req.params.id;
     // limit JSON to what user can update
     // take text and completed from what user sends
-    const body = _pick(req.body, ['text', 'completed']);
+    const body = _.pick(req.body, ['text', 'completed']);
 
     if (!ObjectId.isValid(id)) {
         return res.status(400).send();
@@ -94,7 +95,6 @@ app.patch('todos/:id', (req, res) => {
         body.completed = false;
         body.completedAt = null;
     }
-
     Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
         if(!todo) {
             return res.status(404).send();
