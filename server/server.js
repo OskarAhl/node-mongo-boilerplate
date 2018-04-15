@@ -53,9 +53,26 @@ app.get('/todos/:id', (req, res) => {
             return res.status(404).send();
         } 
         res.send(todo);
-    }, (e) => {
-        console.log('error');
+    }).catch((e) => {
         // not sending (e) - why? can contain confidential info
+        res.status(400).send();
+    });
+});
+
+//DELETE ONE
+app.delete('/todos/:id', (req, res) => {
+    const id = req.params.id;
+    // validate ID
+    if (!ObjectId.isValid(id)) {
+        return res.status(400).send();
+    }
+
+    Todo.findByIdAndRemove(id).then((todo) => {
+        if (!todo) {
+            return res.status(404).send();
+        } 
+        res.send(todo);
+    }).catch((e) => {
         res.status(400).send();
     });
 })
