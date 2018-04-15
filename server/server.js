@@ -1,3 +1,15 @@
+// configure in package.json
+// Set to production by default from heroku
+const env = process.env.NODE_ENV || 'development';
+console.log('env ********** ', env);
+if (env === 'development') {
+    process.env.PORT = 3000;
+    process.env.MONGODB_URI = 'mongodb://localhost:27017/TodoApp';
+} else if (env === 'test') {
+    process.env.PORT = 3000;
+    process.env.MONGODB_URI = 'mongodb://localhost:27017/TodoAppTest';
+}
+
 const express = require('express');
 // middleware - parses HTTP request body -  e.g. JSON or text to JS
 const bodyParser = require('body-parser');
@@ -9,7 +21,7 @@ const { Todo } = require('./models/todo');
 const { User } = require('./models/users');
 
 const app = express();
-const port = process.env.port || 3000;
+const port = process.env.PORT;
 
 // configure middleware - app.use
 // can also add custom middleware
