@@ -26,6 +26,18 @@ app.post('/todos', (req, res) => {
     });
 });
 
+// GET route
+app.get('/todos', (req, res) => {
+    Todo.find().then((todos) => {
+        res.send({
+            todos,
+            message: 'add custom message here'
+        });
+    }, (e) => {
+        res.status(400).send(e);
+    });
+});
+
 const port = 3000;
 app.listen(port, () => {
     console.log('Listening on port ', port);
