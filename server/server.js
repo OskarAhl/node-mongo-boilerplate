@@ -8,6 +8,7 @@ const { Todo } = require('./models/todo');
 const { User } = require('./models/users');
 
 const app = express();
+const port = process.env.port || 3000;
 
 // configure middleware - app.use
 // can also add custom middleware
@@ -59,7 +60,6 @@ app.get('/todos/:id', (req, res) => {
     });
 })
 
-const port = 3000;
 app.listen(port, () => {
     console.log('Listening on port ', port);
 });
