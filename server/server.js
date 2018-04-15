@@ -1,6 +1,7 @@
 const express = require('express');
 // middleware - parses HTTP request body -  e.g. JSON or text to JS
 const bodyParser = require('body-parser');
+const { ObjectId } = require('mongodb');
 
 const { mongoose } = require('./db/mongoose');
 const { Todo } = require('./models/todo');
@@ -12,7 +13,7 @@ const app = express();
 // can also add custom middleware
 app.use(bodyParser.json());
 
-// POST route
+// POST todo
 app.post('/todos', (req, res) => {
     const todo = new Todo({
         text: req.body.text
@@ -25,7 +26,7 @@ app.post('/todos', (req, res) => {
     });
 });
 
-// GET route
+// GET ALL
 app.get('/todos', (req, res) => {
     Todo.find().then((todos) => {
         res.send({
@@ -36,6 +37,27 @@ app.get('/todos', (req, res) => {
         res.status(400).send(e);
     });
 });
+
+//GET BY ID
+app.get('/todos/:id', (req, res) => {
+    const id = req.params.id;
+
+    // validate ID
+    if (!ObjectId.isValid(id)) {
+        return res.status(400).send();
+    }
+
+    Todo.findById(id).then((todo) => {
+        if (!todo) {
+            return res.status(404).send();
+        } 
+        res.send(todo);
+    }, (e) => {
+        console.log('error');
+        // not sending (e) - why? can contain confidential info
+        res.status(400).send();
+    });
+})
 
 const port = 3000;
 app.listen(port, () => {

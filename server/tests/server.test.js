@@ -2,14 +2,16 @@ const expect = require('expect');
 
 // use supertest to test endpoints on app
 const request = require('supertest');
-
+const { ObjectId } = require('mongodb');
 const { app } = require('../server');
 const { Todo } = require('./../models/todo');
 
 const todos = [{
-    text: 'first todo'
+    text: 'first todo',
+    _id: new ObjectId()
 }, {
-    text: 'second test todo'
+    text: 'second test todo',
+    _id: new ObjectId()
 }];
 
 // test lifecycle method
@@ -23,6 +25,7 @@ beforeEach((done) => {
 
 describe('For POST /todos', () => {
     
+    // done for async tests
     it('Should create a new todo', (done) => {
         const text = 'Hellow test';
         let id = '';
@@ -81,5 +84,42 @@ describe('GET /todos', () => {
                 expect(res.body.todos.length).toBe(2);
                 done();
             });
+    });
+});
+
+describe('GET /TODOS/:id', () => {
+    it('should get by id', (done) => {
+        const id = todos[0]._id.toHexString();
+        const text = todos[0].text;
+        request(app)
+            .get(`/todos/${id}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.text).toBe(text);
+            })
+            .end((err, res) => {
+                if (err) { return done(err) }
+
+                expect(res.body._id).toBe(id);
+                done();
+            });
+    });
+
+    it('should return 404 if todo not found', (done) => {
+        const id = new ObjectId().toHexString();
+
+        request(app)
+            .get(`/todos/${id}`)
+            .expect(404)
+            .end(done)
+    });
+
+    it('should return 400 if bad id', (done) => {
+        const id = '123abc';
+
+        request(app)
+            .get(`/todos/${id}`)
+            .expect(400)
+            .end(done)
     });
 });
