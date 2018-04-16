@@ -1,4 +1,5 @@
 const { SHA256 } = require('crypto-js');
+const jwt = require('jsonwebtoken');
 
 const password = 'user123';
 // Hashing - obfuscate the password
@@ -35,4 +36,21 @@ if (resultHash === token.hash) {
 }
 
 //  Why ? to make sure data is not changed / manipulated - i.e. man in the middle attack
-// Standard ====> JWT
+// ***************** Standard ====> JWT ******************************
+
+// takes object and signs it - adds hash (w/ secret) and returns token value
+// jwt.sign
+
+// takes token + secret and verifies that it hasn't been tampered with
+// jwt.verify
+
+var datanew = {
+    id: 10
+};
+
+const jwtToken = jwt.sign(datanew, 'secrethere');
+// send back to user when login
+console.log('jwtToken', jwtToken);
+
+const decoded = jwt.verify(jwtToken, 'secrethere');
+console.log(decoded);
