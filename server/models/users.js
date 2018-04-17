@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
+const _ = require('lodash');
+
 // Why Schema? Add custom method to generate JWT
 const UserSchema = new mongoose.Schema({
         email: {
@@ -35,6 +37,14 @@ const UserSchema = new mongoose.Schema({
     }
 );
 
+// To only send id and email - other properties e.g. token should be hidden
+// determines what will be sent back w/ response
+UserSchema.methods.toJSON = function () {
+    const user = this;
+    const userObject = user.toObject();
+
+    return _.pick(userObject, ['_id', 'email']);
+};
 // Why normal function instead of arrow? arrow doesn't bind this keyword
 UserSchema.methods.generateAuthToken = function () {
     const user = this;
@@ -51,7 +61,7 @@ UserSchema.methods.generateAuthToken = function () {
     return user.save().then(() => {
         return token;
     });
-}
+};
 
 var User = mongoose.model('User', UserSchema);
 
