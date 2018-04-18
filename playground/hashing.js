@@ -1,5 +1,6 @@
 const { SHA256 } = require('crypto-js');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 const password = 'user123';
 // Hashing - obfuscate the password
@@ -54,3 +55,18 @@ console.log('jwtToken', jwtToken);
 
 const decoded = jwt.verify(jwtToken, 'secrethere');
 console.log(decoded);
+
+
+// BCRYPT For password hashing
+const passwordBcrypt = '123abc';
+//  Bcrypt has built in hash
+// 1: nr of rounds - takes longer -> harder for bruteforce,
+bcrypt.genSalt(10, (err, salt) => {
+    bcrypt.hash(password, salt, (err, hash) => {
+        console.log('hash', hash);
+    });
+});
+
+// bcrypt.compare(password, hashPassword, (err, res) => {
+//     res --> true or false
+// })
