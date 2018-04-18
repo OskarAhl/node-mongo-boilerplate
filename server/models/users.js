@@ -37,6 +37,7 @@ const UserSchema = new mongoose.Schema({
     }
 );
 
+// ************ Instance Methods ********************
 // To only send id and email - other properties e.g. token should be hidden
 // determines what will be sent back w/ response
 UserSchema.methods.toJSON = function () {
@@ -62,6 +63,28 @@ UserSchema.methods.generateAuthToken = function () {
         return token;
     });
 };
+
+// ************ Static Methods ********************
+// statics -> model method (as opposed instance method) 
+UserSchema.statics.findByToken = function (token) {
+    const User = this;
+    let decoded;
+
+    // jwt.verify - throws error if anything goes wrong (e.g token value manipulated / wrong secret)
+    // +> use try catch
+    try {
+        decoded = jwt.verify(token, 'somesecret');
+    } catch(e) {
+        return Promise.reject('not validated');
+    }
+
+    return User.findOne({
+        '_id': decoded._id,
+        // query nested
+        'tokens.token': token,
+        'tokens.access': 'auth'
+    });
+}
 
 var User = mongoose.model('User', UserSchema);
 
