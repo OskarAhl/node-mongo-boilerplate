@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 // Why Schema? Add custom method to generate JWT
 const UserSchema = new mongoose.Schema({
@@ -84,7 +85,27 @@ UserSchema.statics.findByToken = function (token) {
         'tokens.token': token,
         'tokens.access': 'auth'
     });
-}
+};
+
+// *************** Mongoose Middleware *********
+// before we save User to DB run this
+// call next() when finished
+UserSchema.pre('save', function (next) {
+    const user = this;
+
+    // only encrypt pw if just modified - e.g. not if only email is updated
+    if (user.isModified('password')) {
+    // 1: nr of rounds - takes longer -> harder for bruteforce,
+    bcrypt.genSalt(10, (err, salt) => {
+        bcrypt.hash(user.password, salt, (err, hash) => {
+            user.password = hash;
+            next();
+        });
+    });
+    } else {
+        next();
+    }
+});
 
 var User = mongoose.model('User', UserSchema);
 
