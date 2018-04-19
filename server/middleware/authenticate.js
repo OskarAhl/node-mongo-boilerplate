@@ -4,7 +4,6 @@ const { User } = require('./../models/users');
 // actual route won't run until next() gets called in middleware
 const authenticate = (req, res, next) => {
     const token = req.header('x-auth');
-    console.log('here');
     User.findByToken(token).then((user) => {
       if (!user) {
         // sends 401
