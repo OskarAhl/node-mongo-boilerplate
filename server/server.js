@@ -19,9 +19,10 @@ const port = process.env.PORT;
 app.use(bodyParser.json());
 
 // POST todo
-app.post('/todos', (req, res) => {
+app.post('/todos', authenticate, (req, res) => {
     const todo = new Todo({
-        text: req.body.text
+        text: req.body.text,
+        _creator: req.user.id
     });
 
     todo.save().then((doc) => {
@@ -32,8 +33,10 @@ app.post('/todos', (req, res) => {
 });
 
 // GET ALL
-app.get('/todos', (req, res) => {
-    Todo.find().then((todos) => {
+app.get('/todos', authenticate, (req, res) => {
+    Todo.find({
+        _creator: req.user.id,
+    }).then((todos) => {
         res.send({
             todos,
             message: 'add custom message here'
