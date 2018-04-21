@@ -47,7 +47,7 @@ app.get('/todos', authenticate, (req, res) => {
 });
 
 //GET BY ID
-app.get('/todos/:id', (req, res) => {
+app.get('/todos/:id', authenticate, (req, res) => {
     const id = req.params.id;
 
     // validate ID
@@ -55,7 +55,10 @@ app.get('/todos/:id', (req, res) => {
         return res.status(400).send();
     }
 
-    Todo.findById(id).then((todo) => {
+    Todo.findOne({
+        _id: id,
+        _creator: req.user._id
+    }).then((todo) => {
         if (!todo) {
             return res.status(404).send();
         } 
@@ -67,13 +70,16 @@ app.get('/todos/:id', (req, res) => {
 });
 
 //DELETE ONE
-app.delete('/todos/:id', (req, res) => {
+app.delete('/todos/:id', authenticate, (req, res) => {
     const id = req.params.id;
     if (!ObjectId.isValid(id)) {
         return res.status(400).send();
     }
 
-    Todo.findByIdAndRemove(id).then((todo) => {
+    Todo.findOneAndRemove({
+        _id: id,
+        _creator: req.user._id
+    }).then((todo) => {
         if (!todo) {
             return res.status(404).send();
         } 
@@ -84,7 +90,7 @@ app.delete('/todos/:id', (req, res) => {
 });
 
 // PATCH / UPDATE 
-app.patch('/todos/:id', (req, res) => {
+app.patch('/todos/:id', authenticate, (req, res) => {
     const id = req.params.id;
     // limit JSON to what user can update
     // take text and completed from what user sends
@@ -101,11 +107,14 @@ app.patch('/todos/:id', (req, res) => {
         body.completed = false;
         body.completedAt = null;
     }
-    Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
-        if(!todo) {
-            return res.status(404).send();
-        }
-        res.send({todo});
+    Todo.findOneAndUpdate(
+        {_id: id, _creator: req.user._id}, 
+        {$set: body}, 
+        {new: true}).then((todo) => {
+            if(!todo) {
+                return res.status(404).send();
+            }
+            res.send({todo});
     }).catch((e) => {
         res.status(400).send();
     });
