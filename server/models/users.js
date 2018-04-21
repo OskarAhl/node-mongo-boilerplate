@@ -51,7 +51,7 @@ UserSchema.methods.toJSON = function () {
 UserSchema.methods.generateAuthToken = function () {
     const user = this;
     const access = 'auth';
-    const token = jwt.sign({_id: user._id.toHexString(), access}, 'somesecret').toString();
+    const token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString();
 
     //  same as push (push some issues with a few mongoDB versions)
     user.tokens.push({
@@ -86,7 +86,7 @@ UserSchema.statics.findByToken = function (token) {
     // jwt.verify - throws error if anything goes wrong (e.g token value manipulated / wrong secret)
     // +> use try catch
     try {
-        decoded = jwt.verify(token, 'somesecret');
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch(e) {
         return Promise.reject('not validated');
     }
